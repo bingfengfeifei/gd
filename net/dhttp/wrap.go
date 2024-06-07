@@ -9,11 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chuck1024/gd/dlog"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"reflect"
+
+	"github.com/chuck1024/gd/dlog"
+	"github.com/gin-gonic/gin"
 )
 
 var ptrToGinCtx = reflect.PtrTo(reflect.TypeOf((*gin.Context)(nil))).Kind()
@@ -83,7 +84,7 @@ func Wrap(toWrap interface{}) gin.HandlerFunc {
 				// TODO fix
 				c.Bind(inValInterface)
 				c.Set(Data, inValInterface)
-				dlog.WarnT("http %s shouldn't include body", http.MethodGet)
+				//dlog.WarnT("http %s shouldn't include body", http.MethodGet)
 			} else {
 				err := c.Bind(inValInterface)
 				if err != nil {
