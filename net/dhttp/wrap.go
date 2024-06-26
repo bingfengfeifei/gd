@@ -9,6 +9,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -46,6 +48,8 @@ func CheckWrap(toWrap interface{}) error {
 	}
 	return nil
 }
+
+var Uni *ut.UniversalTranslator
 
 // example: wrap to gin.HandlerFunc -- func(*Context)
 func Wrap(toWrap interface{}) gin.HandlerFunc {
@@ -96,6 +100,15 @@ func Wrap(toWrap interface{}) gin.HandlerFunc {
 						body = []byte(c.Request.RequestURI)
 					}
 					dlog.Error("wrap data not valid!data=%s,func=%v,err=%v,readBodyErr=%v", string(body), toWrap, err, readBodyErr)
+
+					if v, okV := err.(validator.ValidationErrors); Uni != nil && okV && len(v) > 0 {
+						if t, found := Uni.GetTranslator("zh"); found {
+							Return(c, http.StatusBadRequest, v[0].Translate(t), err, nil)
+							c.Set(SessionLogLevel, "INFO")
+							return
+						}
+					}
+
 					Return(c, http.StatusBadRequest, "data not valid", err, nil)
 					c.Set(SessionLogLevel, "INFO")
 					return
